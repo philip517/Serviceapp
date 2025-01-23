@@ -1,3 +1,16 @@
+<?php
+require "config/conn.php";
+
+session_start();
+
+print_r($_SESSION['msg']);
+
+
+
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="en" style="background: var(--bs-gray-400);">
 
