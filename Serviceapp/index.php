@@ -4,7 +4,7 @@ require "config/conn.php";
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
+    $name = htmlspecialchars(trim($_POST['name']));
     $password = $_POST['password'];
 
     // Check if name and password are not empty
@@ -19,36 +19,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Fetch user details
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($user) {
-                if ($password === $user['password']) { 
-                    // Successful login
-                    echo "<div class='alert alert-success text-center'>Login successful! Welcome, " . htmlspecialchars($user['name']) . ".</div>";
+            if ($user && password_verify($password, $user['password'])) {
+                // Successful login
+                $_SESSION['user'] = [
+                    'id' => $user['id'],
+                    'name' => $user['name'],
+                    'role' => $user['role']
+                ];
                 
-                    // Redirect to another page (e.g., dashboard.php)
-                    if($user['role']=='admin'){
-                        
-                            $_SESSION['msg']="WELCOME ADMIN";
-                            header("Location: home.php");
+                echo "<div class='alert alert-success text-center'>Login successful! Welcome, " . htmlspecialchars($user['name']) . "</div>";
+                
+                // Redirect based on role
+                if ($user['role'] == 'admin') {
+                    $_SESSION['msg'] = "WELCOME ADMIN";
+                    header("Location: home.php");
                     exit;
-                    }
-                    
                 } else {
-                    // Invalid password
-                    echo "<div class='alert alert-danger text-center'>Invalid password. Please try again.</div>";
+                    header("Location: dashboard.php");
+                    exit;
                 }
-                
             } else {
-                // User not found
-                echo "<div class='alert alert-danger text-center'>No account found with this name.</div>";
+                // Invalid credentials
+                echo "<div class='alert alert-danger text-center'>Invalid username or password. Please try again.</div>";
             }
         } catch (PDOException $e) {
             echo "<div class='alert alert-danger text-center'>Error: " . $e->getMessage() . "</div>";
         }
     } else {
-        echo "<div class='alert alert-warning text-center'>Please fill in both name and password.</div>";
+        echo "<div class='alert alert-warning text-center'>Please fill in both username and password.</div>";
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
