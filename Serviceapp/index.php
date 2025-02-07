@@ -1,13 +1,17 @@
 <?php
 session_start();
+
+// Clear all previous session data to force re-login
+session_unset();
+session_destroy();
+session_start();
+
 require "config/conn.php";
 
-// Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = htmlspecialchars(trim($_POST['name']));
     $password = $_POST['password'];
 
-    // Check if name and password are not empty
     if (!empty($name) && !empty($password)) {
         try {
             // Query to fetch user by name
@@ -15,16 +19,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(':name', $name, PDO::PARAM_STR);
             $stmt->execute();
-
-            // Fetch user details
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password'])) {
-                // Successful login
+                // Generate a unique session key
+                $session_key = bin2hex(random_bytes(16));
+                
+                // Store session key in database
+                $update_sql = "UPDATE users SET session_key = :session_key WHERE id = :id";
+                $update_stmt = $pdo->prepare($update_sql);
+                $update_stmt->bindParam(':session_key', $session_key);
+                $update_stmt->bindParam(':id', $user['id']);
+                $update_stmt->execute();
+
+                // Store user details and session key in session
                 $_SESSION['user'] = [
                     'id' => $user['id'],
                     'name' => $user['name'],
-                    'role' => $user['role']
+                    'role' => $user['role'],
+                    'session_key' => $session_key
                 ];
                 
                 echo "<div class='alert alert-success text-center'>Login successful! Welcome, " . htmlspecialchars($user['name']) . "</div>";
@@ -39,7 +52,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     exit;
                 }
             } else {
-                // Invalid credentials
                 echo "<div class='alert alert-danger text-center'>Invalid username or password. Please try again.</div>";
             }
         } catch (PDOException $e) {

@@ -1,7 +1,7 @@
 <?php
 require "config/conn.php";
-session_start();
-
+require "verify.php";
+var_dump($_SESSION['user']);
 // Fetch data from the database
 try {
     $stmt = $pdo->prepare("
@@ -59,7 +59,7 @@ print_r($_SESSION['msg']);
                         </div>
                     </li>
                 </ul>
-                <button class="btn btn-primary" type="button" style="background: #f05757;border-style: none;">Button</button>
+                <a href="index.php" class="btn btn-primary" type="button" style="background: #f05757;border-style: none;">Button</a>
             </div>
         </div>
     </nav>
