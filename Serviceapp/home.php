@@ -1,8 +1,18 @@
 <?php
 require "config/conn.php";
 require "verify.php";
-var_dump($_SESSION['user']);
-// Fetch data from the database
+
+// Handle form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['search'])) {
+    $_SESSION['searchQuery'] = trim($_POST['search']);
+ // Redirect to clear POST data and prevent resubmission alert
+ //header("Location: home.php?search=" . urlencode($searchQuery));
+ //exit();
+}
+// Check if a search term was submitted
+$searchQuery = isset($_POST['search']) ? trim($_POST['search']) : "";
+
+// Fetch data from the database with filtering
 try {
     $stmt = $pdo->prepare("
         SELECT 
@@ -16,16 +26,24 @@ try {
         FROM services
         INNER JOIN trucks ON services.truck_id = trucks.id
         INNER JOIN mechanic ON services.mech_id = mechanic.id
+        WHERE trucks.truck_plate LIKE :searchQuery
         ORDER BY services.service_date DESC
     ");
     
-    $stmt->execute();
+    $stmt->execute(['searchQuery' => "%$searchQuery%"]);
     $services = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $_SESSION['msg'] = "Error: " . $e->getMessage();
 }
 
-print_r($_SESSION['msg']);
+// Clear search when the page is refreshed
+if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
+    unset($_SESSION['searchQuery']);
+    // Redirect to clear POST data and prevent resubmission alert
+    header("Location: home.php?search=" );
+    exit();
+   
+}
 ?>
 
 <!DOCTYPE html>
@@ -36,8 +54,6 @@ print_r($_SESSION['msg']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
     <title>PHILIP</title>
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="assets/css/animate.min.css">
-    <link rel="stylesheet" href="assets/css/Navbar-Centered-Links-icons.css">
 </head>
 
 <body style="background: var(--bs-gray-400);text-align: center;">
@@ -59,7 +75,7 @@ print_r($_SESSION['msg']);
                         </div>
                     </li>
                 </ul>
-                <a href="index.php" class="btn btn-primary" type="button" style="background: #f05757;border-style: none;">Button</a>
+                <a href="index.php" class="btn btn-primary" type="button" style="background: #f05757;border-style: none;">LOGOUT</a>
             </div>
         </div>
     </nav>
@@ -69,8 +85,9 @@ print_r($_SESSION['msg']);
             <div class="row">
                 <div class="col"></div>
                 <div class="col">
-                    <form style="display: flex;">
-                        <input class="form-control" type="search" style="width: 276.9px;" placeholder="Search by plate number...">
+                    <!-- Search Form -->
+                    <form method="POST" action="" style="display: flex;">
+                        <input class="form-control" type="search" name="search" style="width: 276.9px;" placeholder="Search by plate number..." value="<?= htmlspecialchars($searchQuery) ?>">
                         <input class="btn btn-primary" type="submit" value="Search">
                     </form>
                 </div>
@@ -94,7 +111,7 @@ print_r($_SESSION['msg']);
                     <tbody>
                         <?php if (!empty($services)) : ?>
                             <?php foreach ($services as $service) : ?>
-                                <tr>
+                                <tr style="border-bottom:solid 2px black;">
                                     <td style="text-align: center;"><?= htmlspecialchars($service['service_date']) ?></td>
                                     <td style="text-align: center;"><?= htmlspecialchars($service['truck_plate']) ?></td>
                                     <td style="text-align: center;"><?= htmlspecialchars($service['job_card_number']) ?></td>
@@ -115,6 +132,5 @@ print_r($_SESSION['msg']);
     </section>
 
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
-    <script src="assets/js/bs-init.js"></script>
 </body>
 </html>
