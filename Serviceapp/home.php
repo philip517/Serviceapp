@@ -5,9 +5,8 @@ require "verify.php";
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['search'])) {
     $_SESSION['searchQuery'] = trim($_POST['search']);
- // Redirect to clear POST data and prevent resubmission alert
- //header("Location: home.php?search=" . urlencode($searchQuery));
- //exit();
+  
+
 }
 // Check if a search term was submitted
 $searchQuery = isset($_POST['search']) ? trim($_POST['search']) : "";
@@ -17,6 +16,7 @@ try {
     $stmt = $pdo->prepare("
         SELECT 
             services.id,
+            services.truck_id,
             services.service_date,
             trucks.truck_plate,
             services.job_card_number,
@@ -109,23 +109,24 @@ if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['search'])) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (!empty($services)) : ?>
-                            <?php foreach ($services as $service) : ?>
-                                <tr style="border-bottom:solid 2px black;">
-                                    <td style="text-align: center;"><?= htmlspecialchars($service['service_date']) ?></td>
-                                    <td style="text-align: center;"><?= htmlspecialchars($service['truck_plate']) ?></td>
-                                    <td style="text-align: center;"><?= htmlspecialchars($service['job_card_number']) ?></td>
-                                    <td style="text-align: center;"><?= htmlspecialchars($service['odometer']) ?></td>
-                                    <td style="text-align: center;"><?= htmlspecialchars($service['next_service']) ?></td>
-                                    <td style="text-align: center;"><?= htmlspecialchars($service['mechanic_name']) ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else : ?>
-                            <tr>
-                                <td colspan="6" style="text-align: center;">No service records found.</td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
+    <?php if (!empty($services)) : ?>
+        <?php foreach ($services as $service) : ?>
+            <tr style="border-bottom:solid 2px black; cursor: pointer;"
+                onclick="window.location.href='truck.php?truck_id=<?= $service['truck_id'] ?>'">
+                <td style="text-align: center;"><?= htmlspecialchars($service['service_date']) ?></td>
+                <td style="text-align: center;"><?= htmlspecialchars($service['truck_plate']) ?></td>
+                <td style="text-align: center;"><?= htmlspecialchars($service['job_card_number']) ?></td>
+                <td style="text-align: center;"><?= htmlspecialchars($service['odometer']) ?></td>
+                <td style="text-align: center;"><?= htmlspecialchars($service['next_service']) ?></td>
+                <td style="text-align: center;"><?= htmlspecialchars($service['mechanic_name']) ?></td>
+            </tr>
+        <?php endforeach; ?>
+    <?php else : ?>
+        <tr>
+            <td colspan="6" style="text-align: center;">No service records found.</td>
+        </tr>
+    <?php endif; ?>
+</tbody>
                 </table>
             </div>
         </div>

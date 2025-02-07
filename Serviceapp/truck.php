@@ -1,14 +1,30 @@
 <?php
-session_start();
-require "config/conn.php";
 require "verify.php";
+require "config/conn.php";
 // Check if 'id' parameter is set in the URL, if not, redirect to home.php
-if (!isset($_GET['id'])) {
+if (!isset($_GET['truck_id'])) {
     header("Location: home.php");
     exit;
 }
+$truck_id = (int) $_GET['truck_id']; // Convert to integer for safety
 
-$truck_id = $_GET['id'];
+try {
+    $sql = "SELECT * FROM trucks WHERE id = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':id', $truck_id, PDO::PARAM_INT); // Use PARAM_INT for security
+    $stmt->execute();
+    $truck = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($truck) {
+        $num_plate = $truck['truck_plate']; // Save truck plate as num_plate
+        echo $num_plate;
+    } else {
+        die("Truck not found.");
+    }
+} catch (PDOException $e) {
+    die("Database error: " . $e->getMessage());
+}
+
 
 // Check if form is submitted
 if (isset($_POST['submit'])) {
@@ -138,7 +154,7 @@ try {
             <div class="col">
                 <div>
                     <div class="card">
-                        <h1 class="d-md-flex flex-column-reverse justify-content-center align-items-center align-content-center justify-content-md-center" style="height: 69.2px;background: var(--bs-black);color: var(--bs-gray-400);">NUMBER PLATE</h1>
+                        <h1 class="d-md-flex flex-column-reverse justify-content-center align-items-center align-content-center justify-content-md-center" style="height: 69.2px;background: var(--bs-black);color: var(--bs-gray-400);"><?php echo $num_plate;?></h1>
                         <div class="card-body" style="width: 708PX;">
                             <form method="POST" style="display: block;position: relative;width: 708PX;">
                                 <!-- Form fields -->
