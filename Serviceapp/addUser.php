@@ -1,7 +1,7 @@
 <?php 
 session_start();
 require "config/conn.php";
-
+require "verify.php";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $name = htmlspecialchars(trim($_POST["name"]));
     $role = htmlspecialchars(trim($_POST["role"]));

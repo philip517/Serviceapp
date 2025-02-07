@@ -1,7 +1,7 @@
 <?php
 session_start();
 require "config/conn.php";
-
+require "verify.php";
 // Check if 'id' parameter is set in the URL, if not, redirect to home.php
 if (!isset($_GET['id'])) {
     header("Location: home.php");

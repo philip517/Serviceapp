@@ -1,7 +1,7 @@
 <?php
 session_start();
 require "config/conn.php"; 
-
+require "verify.php";
 // Insert truck data when form is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Validate form data

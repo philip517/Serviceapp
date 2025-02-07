@@ -4,7 +4,7 @@ require "config/conn.php";
 
 // Check if the user is logged in
 if (!isset($_SESSION['user'])) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit;
 }
 
@@ -22,7 +22,7 @@ if (!$db_user || $db_user['session_key'] !== $session_key) {
     // Logout user if session key does not match
     session_unset();
     session_destroy();
-    header("Location: login.php");
+    header("Location: index.php");
     exit;
 }
 ?>

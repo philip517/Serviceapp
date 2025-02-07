@@ -1,3 +1,8 @@
+<?php 
+require "verify.php";
+
+?>
+
 <!DOCTYPE html>
 <html lang="en" style="background: var(--bs-gray-400);">
 
