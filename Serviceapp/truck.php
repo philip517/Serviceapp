@@ -144,13 +144,13 @@ try {
                                 <!-- Form fields -->
                                 <div style="width: 708px;display: flex;position: relative;">
                                     <label class="form-label d-md-flex align-items-md-center" style="padding-top: 0px;margin-right: 15px;">ODOMETER</label>
-                                    <input class="form-control" type="number" name="kilometer" max="100000" min="0" placeholder="000000" style="height: 38px;margin-right: 0px;width: 350.7px;" required>
+                                    <input class="form-control" type="number" name="kilometer" max="999999" min="0" placeholder="000000" style="height: 38px;margin-right: 0px;width: 350.7px;" required>
                                     <span class="text-uppercase d-md-flex align-items-md-center" style="margin-left: 10px;width: 200px;text-align: center;">Text</span>
                                 </div>
                                 <div style="display: flex;margin: 0px;margin-top: 18px;">
                                     <label class="form-label d-md-flex align-items-md-center" style="width: 88.3px;padding-bottom: 0px;margin-bottom: 0px;padding-left: 0px;padding-right: 0px;padding-top: 0px;margin-right: 15px;">JC NUMBER</label>
                                     <!-- Job card number field with the 'JC/N/' prefix already added -->
-                                    <input class="form-control" type="text" style="width: 350PX;" name="jc_number" placeholder="1 to 9999" autocomplete="off" pattern="^[1-9][0-9]{0,3}$" required title="Enter the last part of JC/N/1 to JC/N/9999.">
+                                    <input class="form-control" type="text" style="width: 350PX;" name="jc_number" placeholder="1 to 999999" autocomplete="off" pattern="^[1-9][0-9]{0,3}$" required title="Enter the last part of JC/N/1 to JC/N/9999.">
                                 </div>
                                 <div style="display: flex;margin: 0px;margin-top: 18px;">
                                     <label class="form-label d-md-flex align-items-md-center" style="width: 88.3px;padding-bottom: 0px;margin-bottom: 0px;padding-left: 0px;padding-right: 0px;margin-right: 15px;">MECHANIC</label>
