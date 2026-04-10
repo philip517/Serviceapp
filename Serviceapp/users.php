@@ -1,25 +1,28 @@
 <?php
 // users.php - User Management Page
+// Start session to check user permissions
 session_start();
 
-// Database connection
+// Database connection parameters
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "truck";
 
+// Establish database connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
+// Check if connection was successful
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle delete request
+// Handle user deletion request from GET parameter
 if (isset($_GET['delete'])) {
     $user_id = mysqli_real_escape_string($conn, $_GET['delete']);
     
-    // Prevent deleting the main admin (optional)
-    if ($user_id != 1) { // Assuming admin has user_id = 1
+    // Prevent deleting the main admin (assuming user_id = 1 is admin)
+    if ($user_id != 1) {
         $delete_sql = "DELETE FROM users WHERE user_id = '$user_id'";
         if ($conn->query($delete_sql) === TRUE) {
             $success_message = "User deleted successfully!";
@@ -31,7 +34,7 @@ if (isset($_GET['delete'])) {
     }
 }
 
-// Fetch all users
+// Fetch all users from the database for display
 $users_sql = "SELECT user_id, username, email, user_type, created_at FROM users ORDER BY user_id DESC";
 $users_result = $conn->query($users_sql);
 ?>
@@ -59,7 +62,7 @@ $users_result = $conn->query($users_sql);
             <div class="collapse navbar-collapse" id="navcol-3">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link" href="home.php" style="font-weight: bold;">HOME</a></li>
-                    <li class="nav-item"><a class="nav-link" href="viewtrucks.php" style="font-weight: bold;">SERVICE LOG</a></li>
+                    <li class="nav-item"><a class="nav-link" href="service_log.php" style="font-weight: bold;">SERVICE LOG</a></li>
                     <li class="nav-item dropdown">
                         <a class="dropdown-toggle nav-link active" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="font-weight: bold;">MORE</a>
                         <div class="dropdown-menu">

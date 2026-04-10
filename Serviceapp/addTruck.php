@@ -1,17 +1,23 @@
 <?php
+// Include the database connection file
 require_once __DIR__ . '/config/conn.php';
 
+// Initialize variables for form data and messages
 $number_plate = '';
 $model = 'faw';
 $success_message = '';
 $error_message = '';
 $trucks = [];
 
+// Check if database connection is established
 if ($conn) {
+    // Handle form submission via POST method
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Sanitize and validate input data
         $number_plate = strtoupper(trim($_POST['number_plate'] ?? ''));
         $model = trim($_POST['model'] ?? 'faw');
 
+        // Validate number plate input
         if ($number_plate === '') {
             $error_message = 'Please enter a truck number plate.';
         } elseif (!preg_match('/^[A-Z]{3}\d{3,4}$/', $number_plate)) {
@@ -19,6 +25,7 @@ if ($conn) {
         } elseif (!in_array($model, ['faw', 'sino'], true)) {
             $error_message = 'Invalid truck model.';
         } else {
+            // Check if the number plate already exists in the database
             $stmt = $conn->prepare('SELECT truck_id FROM trucks WHERE number_plate = ? LIMIT 1');
             if ($stmt) {
                 $stmt->bind_param('s', $number_plate);
@@ -27,11 +34,13 @@ if ($conn) {
                 if ($stmt->num_rows > 0) {
                     $error_message = 'A truck with this number plate already exists.';
                 } else {
+                    // Insert the new truck into the database
                     $insert = $conn->prepare('INSERT INTO trucks (number_plate, model) VALUES (?, ?)');
                     if ($insert) {
                         $insert->bind_param('ss', $number_plate, $model);
                         if ($insert->execute()) {
                             $success_message = 'Truck added successfully.';
+                            // Reset form fields after successful insertion
                             $number_plate = '';
                             $model = 'faw';
                         } else {
@@ -49,6 +58,7 @@ if ($conn) {
         }
     }
 
+    // Fetch all trucks from the database for display
     $result = $conn->query('SELECT truck_id, number_plate, model, created_at FROM trucks ORDER BY truck_id DESC');
     if ($result) {
         while ($row = $result->fetch_assoc()) {
@@ -60,7 +70,6 @@ if ($conn) {
 ?>
 
 <!DOCTYPE >
-< lang="en" style="background: var(--bs-gray-400);">
 
 <head>
     <meta charset="utf-8">
@@ -71,19 +80,7 @@ if ($conn) {
 </head>
 
 <body style="background: var(--bs-gray-400);text-align: center;height: 690.2px;">
-    <nav class="navbar navbar-light navbar-expand-md py-3" style="background: var(--bs-gray-100);border-color: var(--bs-blue);border-bottom-width: 32px;border-bottom-color: var(--bs-danger);">
-        <div class="container"><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-3"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navcol-3" style="background: var(--bs-white);color: var(--bs-gray-700);">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link active" href="home.php" style="color: var(--bs-gray-700);font-weight: bold;">HOME</a></li>
-                    <li class="nav-item"><a class="nav-link" href="viewtrucks." style="color: var(--bs-gray-700);font-weight: bold;">SERVICE LOG</a></li>
-                    <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="font-weight: bold;font-size: 16px;color: var(--bs-navbar-active-color);">MORE</a>
-                        <div class="dropdown-menu"><a class="dropdown-item" href="addTruck.">Add Truck</a><a class="dropdown-item" href="profile.">Profile</a><a class="dropdown-item" href="#">Third Item</a></div>
-                    </li>
-                </ul><button class="btn btn-primary" type="button" style="background: #f05757;border-style: none;">Button</button>
-            </div>
-        </div>
-    </nav>
+    <?php include 'nav.php'; ?>
     <div class="container" style="height: 71px;">
         <div></div>
     </div>

@@ -1,28 +1,32 @@
 <?php
 // editUser.php - Edit User Page
+// Start session to manage user login state
 session_start();
 
-// Database connection
+// Database connection parameters
 $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname = "truck";
 
+// Establish database connection
 $conn = new mysqli($servername, $username, $password, $dbname);
 
+// Check if connection was successful
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
+// Initialize variables for messages and user data
 $error_message = "";
 $success_message = "";
 $user_data = null;
 
-// Check if user ID is provided
+// Check if user ID is provided in the URL
 if (isset($_GET['id'])) {
     $user_id = mysqli_real_escape_string($conn, $_GET['id']);
     
-    // Fetch user data
+    // Fetch existing user data from database
     $sql = "SELECT user_id, username, email, user_type FROM users WHERE user_id = '$user_id'";
     $result = $conn->query($sql);
     
@@ -33,33 +37,34 @@ if (isset($_GET['id'])) {
     }
 }
 
-// Handle form submission
+// Handle form submission for updating user
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['user_id'])) {
     $user_id = mysqli_real_escape_string($conn, $_POST['user_id']);
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $user_type = mysqli_real_escape_string($conn, $_POST['user_type']);
     
-    // Check if username already exists for another user
+    // Check if the new username already exists for another user
     $check_sql = "SELECT user_id FROM users WHERE username = '$username' AND user_id != '$user_id'";
     $check_result = $conn->query($check_sql);
     
     if ($check_result->num_rows > 0) {
         $error_message = "Username already exists!";
     } else {
-        // Update user information
+        // Prepare update query for user information
         $update_sql = "UPDATE users SET username = '$username', email = '$email', user_type = '$user_type' WHERE user_id = '$user_id'";
         
-        // If password is provided, update it too
+        // If a new password is provided, include it in the update
         if (!empty($_POST['password'])) {
             $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
             $update_sql = "UPDATE users SET username = '$username', email = '$email', user_type = '$user_type', password = '$hashed_password' WHERE user_id = '$user_id'";
         }
         
+        // Execute the update query
         if ($conn->query($update_sql) === TRUE) {
             $success_message = "User updated successfully!";
             
-            // Refresh user data
+            // Refresh the user data after update
             $refresh_sql = "SELECT user_id, username, email, user_type FROM users WHERE user_id = '$user_id'";
             $refresh_result = $conn->query($refresh_sql);
             $user_data = $refresh_result->fetch_assoc();
@@ -82,30 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['user_id'])) {
 </head>
 
 <body>
-    <nav class="navbar navbar-light navbar-expand-md py-3" style="background: var(--bs-gray-100);">
-        <div class="container">
-            <button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-3">
-                <span class="visually-hidden">Toggle navigation</span>
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navcol-3">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link" href="home.php" style="font-weight: bold;">HOME</a></li>
-                    <li class="nav-item"><a class="nav-link" href="viewtrucks.php" style="font-weight: bold;">SERVICE LOG</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="dropdown-toggle nav-link active" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="font-weight: bold;">MORE</a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item" href="addTruck.php">Add Truck</a>
-                            <a class="dropdown-item" href="addUser.php">Add User</a>
-                            <a class="dropdown-item" href="users.php">Manage Users</a>
-                            <a class="dropdown-item" href="profile.php">Profile</a>
-                        </div>
-                    </li>
-                </ul>
-                <a href="logout.php" class="btn btn-primary" style="background: #f05757;border-style: none;">Logout</a>
-            </div>
-        </div>
-    </nav>
+  <?php include 'nav.php'; ?>
     
     <section class="py-4 py-xl-5">
         <div class="container">

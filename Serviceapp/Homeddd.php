@@ -1,12 +1,17 @@
 <?php
+// Include the database connection file
 require_once __DIR__ . '/config/conn.php';
 
+// Initialize variables for search and service records data
 $search_plate = '';
 $service_records = [];
 
+// Check if database connection is established
 if ($conn) {
+    // Get search query from GET parameter and sanitize it
     $search_plate = isset($_GET['search']) ? strtoupper(trim($_GET['search'])) : '';
     
+    // If search is provided, query service records for trucks matching the plate
     if ($search_plate !== '') {
         $query = 'SELECT sr.service_id, sr.service_date, sr.service_kilometers, sr.next_due_kilometers, sr.jobcard_number, t.number_plate 
                   FROM service_records sr 
@@ -19,18 +24,21 @@ if ($conn) {
             $stmt->bind_param('s', $like_plate);
             $stmt->execute();
             $result = $stmt->get_result();
+            // Fetch and store service record data
             while ($row = $result->fetch_assoc()) {
                 $service_records[] = $row;
             }
             $stmt->close();
         }
     } else {
+        // If no search, fetch recent service records (limited to 50)
         $query = 'SELECT sr.service_id, sr.service_date, sr.service_kilometers, sr.next_due_kilometers, sr.jobcard_number, t.number_plate 
                   FROM service_records sr 
                   JOIN trucks t ON sr.truck_id = t.truck_id 
                   ORDER BY sr.service_date DESC LIMIT 50';
         $result = $conn->query($query);
         if ($result) {
+            // Fetch and store service record data
             while ($row = $result->fetch_assoc()) {
                 $service_records[] = $row;
             }
@@ -57,7 +65,7 @@ if ($conn) {
             <div class="collapse navbar-collapse" id="navcol-3" style="background: var(--bs-white);color: var(--bs-gray-700);">
                 <ul class="navbar-nav mx-auto">
                     <li class="nav-item"><a class="nav-link active" href="home.php" style="color: var(--bs-gray-700);font-weight: bold;">HOME</a></li>
-                    <li class="nav-item"><a class="nav-link" href="viewtrucks.php" style="color: var(--bs-gray-700);font-weight: bold;">SERVICE LOG</a></li>
+                    <li class="nav-item"><a class="nav-link" href="service_log.php" style="color: var(--bs-gray-700);font-weight: bold;">SERVICE LOG</a></li>
                     <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="font-weight: bold;font-size: 16px;color: var(--bs-navbar-active-color);">MORE</a>
                         <div class="dropdown-menu"><a class="dropdown-item" href="addTruck.php">Add Truck</a><a class="dropdown-item" href="profile.php">Profile</a><a class="dropdown-item" href="#">Third Item</a></div>
                     </li>

@@ -11,54 +11,56 @@
 
 <body>
     <?php
-    // Start session to check if user is logged in and is admin
+    // Start session to manage user login state
     session_start();
     
-    // Database connection
+    // Database connection parameters
     $servername = "localhost";
     $username = "root";
     $password = "";
     $dbname = "truck";
 
-    // Create connection
+    // Establish database connection
     $conn = new mysqli($servername, $username, $password, $dbname);
 
-    // Check connection
+    // Check if connection was successful
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
 
-    // Initialize message variables
+    // Initialize variables for success and error messages
     $success_message = "";
     $error_message = "";
 
-    // Check if form is submitted
+    // Check if the form has been submitted via POST method
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        // Get form data
+        // Retrieve and sanitize form input data
         $name = mysqli_real_escape_string($conn, $_POST['name']);
         $user_type = mysqli_real_escape_string($conn, $_POST['user_type']);
         $password = $_POST['password'];
         
-        // Validate input
+        // Validate that all required fields are filled
         if (empty($name) || empty($user_type) || empty($password)) {
             $error_message = "All fields are required!";
         } else {
-            // Check if username already exists
+            // Check if the username already exists in the database
             $check_sql = "SELECT username FROM users WHERE username = '$name'";
             $check_result = $conn->query($check_sql);
             
             if ($check_result->num_rows > 0) {
                 $error_message = "Username already exists!";
             } else {
-                // Hash the password
+                // Hash the password for secure storage
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
                 
-                // Insert new user (email is optional, set to empty string if not provided)
+                // Get email if provided, otherwise set to empty
                 $email = isset($_POST['email']) ? mysqli_real_escape_string($conn, $_POST['email']) : '';
                 
+                // Prepare SQL query to insert new user into database
                 $insert_sql = "INSERT INTO users (username, password, email, user_type) 
                                VALUES ('$name', '$hashed_password', '$email', '$user_type')";
                 
+                // Execute the insert query and set appropriate message
                 if ($conn->query($insert_sql) === TRUE) {
                     $success_message = "User added successfully!";
                 } else {
@@ -68,23 +70,11 @@
         }
     }
 
+    // Close the database connection
     $conn->close();
     ?>
 
-    <nav class="navbar navbar-light navbar-expand-md py-3" style="background: var(--bs-gray-100);border-color: var(--bs-blue);border-bottom-width: 32px;border-bottom-color: var(--bs-danger);">
-        <div class="container"><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-3"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
-            <div class="collapse navbar-collapse" id="navcol-3" style="background: var(--bs-white);color: var(--bs-gray-700);">
-                <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link active" href="home.php" style="color: var(--bs-gray-700);font-weight: bold;">HOME</a></li>
-                    <li class="nav-item"><a class="nav-link" href="viewtrucks.php" style="color: var(--bs-gray-700);font-weight: bold;">SERVICE LOG</a></li>
-                    <li class="nav-item dropdown"><a class="dropdown-toggle nav-link" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="font-weight: bold;font-size: 16px;color: var(--bs-navbar-active-color);">MORE</a>
-                        <div class="dropdown-menu"><a class="dropdown-item" href="addTruck.php">Add Truck</a><a class="dropdown-item" href="profile.php">Profile</a><a class="dropdown-item" href="addUser.php">Add User</a></div>
-                    </li>
-                </ul>
-                <a href="logout.php" class="btn btn-primary" style="background: #f05757;border-style: none;">Logout</a>
-            </div>
-        </div>
-    </nav>
+    <?php include 'nav.php'; ?>
     
     <section class="py-4 py-xl-5">
         <div class="container" style="border-radius: 3px;">
